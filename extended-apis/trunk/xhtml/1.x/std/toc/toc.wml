@@ -100,6 +100,8 @@ return ("<li>", "<a href=\"#" . $elem->{id} . "\">", $elem->{body}, "</a>",
         ),
         "</li>");
 }
+END 
+{
 my $text;
 $text = join ("\n", 
     "<ul>",
@@ -107,12 +109,9 @@ $text = join ("\n",
     "</ul>",
     );
 print "{#WML_XSTD_TOC_ToC#:$text:##}";
+}
 }:>
 </define-tag>
 
-{#WML_XHTML_STD_TOC_BODY#}
-
 <toc_finale />
-
-{#WML_XHTML_STD_TOC_BODY#:
 
