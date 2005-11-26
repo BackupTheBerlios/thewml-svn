@@ -1,0 +1,118 @@
+## 
+##  wml::xhtml1::std::toc - Table of Conents Generator
+##  Copyright (c) 2005 Shlomi Fish
+##  Distributed under the MIT X11 License
+##  http://www.opensource.org/licenses/mit-license.php
+
+<:{
+use HTML::TokeParser::Simple;
+use vars qw($wml_xhtml_std_toc_section);
+$wml_xhtml_std_toc_section = [];
+}:>
+
+<define-tag h2 whitespace="delete" endtag="required">
+<preserve id />
+<h2*<attributes-quote %attributes /> >%body</h2*>
+<set-var %attributes />
+<:{
+
+my $id = <<'EOCMMFINVBOWVNIANFINLNGINWNOF';
+<get-var id />
+EOCMMFINVBOWVNIANFINLNGINWNOF
+
+my $tag_body = <<'EOCMMFINVBOWVNIANFINLNGINWNOF';
+%body
+EOCMMFINVBOWVNIANFINLNGINWNOF
+
+chomp($id);
+chomp($tag_body);
+my $parser = HTML::TokeParser::Simple->new(\$tag_body);
+my $my_body;
+while ($token = $parser->get_token())
+{
+    if ($token->is_start_tag("a") || $token->is_end_tag("a"))
+    {
+        # Do nothing - we throw away links.
+    }
+    else
+    {
+        $my_body .= $token->as_is();
+    }
+}
+push @$wml_xhtml_std_toc_section, { 'id' => $id, 'body' => $my_body, 'subs' => [],};
+}:>
+<restore id />
+</define-tag>
+
+<define-tag h3 whitespace="delete" endtag="required">
+<preserve id />
+<h3*<attributes-quote %attributes /> >%body</h3*>
+<set-var %attributes />
+<:{
+
+my $id = <<'EOCMMFINVBOWVNIANFINLNGINWNOF';
+<get-var id />
+EOCMMFINVBOWVNIANFINLNGINWNOF
+
+my $tag_body = <<'EOCMMFINVBOWVNIANFINLNGINWNOF';
+%body
+EOCMMFINVBOWVNIANFINLNGINWNOF
+
+chomp($id);
+chomp($tag_body);
+
+my $parser = HTML::TokeParser::Simple->new(\$tag_body);
+my $my_body;
+while ($token = $parser->get_token())
+{
+    if ($token->is_start_tag("a") || $token->is_end_tag("a"))
+    {
+        # Do nothing - we throw away links.
+    }
+    else
+    {
+        $my_body .= $token->as_is();
+    }
+}
+push @{$wml_xhtml_std_toc_section->[-1]->{subs}}, { 'id' => $id, 'body' => $my_body, 'subs' => [],};
+}:>
+<restore id />
+</define-tag>
+
+<define-tag toc>
+{#WML_XSTD_TOC_ToC#}
+</define-tag>
+
+<define-tag toc_finale>
+<:{
+sub myfunc
+{
+my $elem = shift;
+return ("<li>", "<a href=\"#" . $elem->{id} . "\">", $elem->{body}, "</a>",
+        (@{$_->{subs}} ? 
+            ("<br />", "<ul>", 
+                (map { myfunc($_)
+                    }
+                @{$_->{subs}}),
+                "</ul>",
+            ) :
+            ()
+        ),
+        "</li>");
+}
+my $text;
+$text = join ("\n", 
+    "<ul>",
+    (map { myfunc($_) } @$wml_xhtml_std_toc_section),
+    "</ul>",
+    );
+print "{#WML_XSTD_TOC_ToC#:$text:##}";
+}:>
+</define-tag>
+
+{#WML_XHTML_STD_TOC_BODY#}
+
+<toc_finale />
+
+{#WML_XHTML_STD_TOC_BODY#:
+
