@@ -7,12 +7,13 @@
 <:{
 use HTML::TokeParser::Simple;
 use vars qw($wml_xhtml_std_toc_section);
-$wml_xhtml_std_toc_section = [];
+$wml_xhtml_std_toc_section = { 'subs' => [] };
 }:>
-
-<define-tag h2 whitespace="delete" endtag="required">
+[% SET inner_refs = "" %]
+[% FOREACH index IN [2,3,4,5,6] %]
+<define-tag h[% index %] whitespace="delete" endtag="required">
 <preserve id />
-<h2*<attributes-quote %attributes /> >%body</h2*>
+<h[% index %]*<attributes-quote %attributes /> >%body</h[% index %]*>
 <set-var %attributes />
 <:{
 
@@ -39,45 +40,12 @@ while ($token = $parser->get_token())
         $my_body .= $token->as_is();
     }
 }
-push @$wml_xhtml_std_toc_section, { 'id' => $id, 'body' => $my_body, 'subs' => [],};
+push @{$wml_xhtml_std_toc_section[% inner_refs %]->{'subs'}}, { 'id' => $id, 'body' => $my_body, 'subs' => [],};
 }:>
 <restore id />
 </define-tag>
-
-<define-tag h3 whitespace="delete" endtag="required">
-<preserve id />
-<h3*<attributes-quote %attributes /> >%body</h3*>
-<set-var %attributes />
-<:{
-
-my $id = <<'EOCMMFINVBOWVNIANFINLNGINWNOF';
-<get-var id />
-EOCMMFINVBOWVNIANFINLNGINWNOF
-
-my $tag_body = <<'EOCMMFINVBOWVNIANFINLNGINWNOF';
-%body
-EOCMMFINVBOWVNIANFINLNGINWNOF
-
-chomp($id);
-chomp($tag_body);
-
-my $parser = HTML::TokeParser::Simple->new(\$tag_body);
-my $my_body;
-while ($token = $parser->get_token())
-{
-    if ($token->is_start_tag("a") || $token->is_end_tag("a"))
-    {
-        # Do nothing - we throw away links.
-    }
-    else
-    {
-        $my_body .= $token->as_is();
-    }
-}
-push @{$wml_xhtml_std_toc_section->[-1]->{subs}}, { 'id' => $id, 'body' => $my_body, 'subs' => [],};
-}:>
-<restore id />
-</define-tag>
+[% SET inner_refs = inner_refs _ "->{'subs'}->[-1]" %]
+[% END %]
 
 <define-tag toc>
 {#WML_XSTD_TOC_ToC#}
@@ -105,7 +73,7 @@ END
 my $text;
 $text = join ("\n", 
     "<ul>",
-    (map { myfunc($_) } @$wml_xhtml_std_toc_section),
+    (map { myfunc($_) } @{$wml_xhtml_std_toc_section->{subs}}),
     "</ul>",
     );
 print "{#WML_XSTD_TOC_ToC#:$text:##}";
