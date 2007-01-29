@@ -56,7 +56,7 @@ push @{$wml_xhtml_std_toc_section[% inner_refs %]->{'subs'}}, { 'id' => $id, 'bo
 sub myfunc
 {
 my $elem = shift;
-return ("<li>", "<a href=\"#" . $elem->{id} . "\">", $elem->{body}, "</a>",
+return ("<li>", "<a href=\"#" . $elem->{id} . "\">" . $elem->{body} . "</a>",
         (@{$_->{subs}} ? 
             ("<br />", "<ul>", 
                 (map { myfunc($_)
