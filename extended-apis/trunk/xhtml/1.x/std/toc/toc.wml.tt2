@@ -40,7 +40,19 @@ while ($token = $parser->get_token())
         $my_body .= $token->as_is();
     }
 }
-push @{$wml_xhtml_std_toc_section[% inner_refs %]->{'subs'}}, { 'id' => $id, 'body' => $my_body, 'subs' => [],};
+
+my @prev_sects = ($wml_xhtml_std_toc_section);
+foreach my $idx (3 .. [% index %])
+{
+    if (! exists($prev_sects[-1]->{'subs'}))
+    {
+        use Data::Dumper;
+        print {*STDERR} Dumper(\@prev_sects);
+        die "Cannot find a subs in the last prev_sects!";
+    }
+    push @prev_sects, $prev_sects[-1]->{'subs'}->[-1];
+}
+push @{$prev_sects[-1]->{subs}}, { 'id' => $id, 'body' => $my_body, 'subs' => [],};
 }:>
 <restore id />
 </define-tag>
